@@ -1,0 +1,61 @@
+﻿<Page x:Class="PlaneFocusLogger.Connect"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:PlaneFocusLogger"
+      mc:Ignorable="d" 
+      d:DesignHeight="450"
+      d:DesignWidth="800"
+      FontSize="16"
+      Title="Connect"
+      Loaded="Page_Loaded"
+      Unloaded="Page_Unloaded">
+
+    <Page.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="2"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid HorizontalAlignment="Center"
+          VerticalAlignment="Center">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="128"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0"
+               Content="Host"/>
+        <TextBox x:Name="txbHost" Grid.Row="0" Grid.Column="1"
+                 Text="255.255.255.255"/>
+
+        <Label Grid.Row="1" Grid.Column="0"
+               Content="Port"/>
+        <TextBox x:Name="txbPort" Grid.Row="1" Grid.Column="1"/>
+
+        <Label Grid.Row="2" Grid.Column="0"
+               Content="Source"/>
+        <ComboBox x:Name="cmbSource" Grid.Row="2" Grid.Column="1"/>
+
+        <Label Grid.Row="3" Grid.Column="0"
+               HorizontalContentAlignment="Right"
+               Content="is filtered"/>
+        <CheckBox x:Name="chkSourceFiltered" Grid.Row="3" Grid.Column="1"
+                  VerticalAlignment="Center"/>
+
+        <Button x:Name="btnConnect" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                Margin="0,32,0,0"
+                Padding="16"
+                Content="Connect"
+                Click="Connect_Click"/>
+    </Grid>
+</Page>
