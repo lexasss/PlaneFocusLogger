@@ -67,7 +67,7 @@ public class Plane
 
     readonly string _planeName;
     // readonly Logging.FlowLogger _logger = Logging.FlowLogger.Instance;
-    readonly Logging.Statistics _statistics = Logging.Statistics.Instance;
+    readonly Logging.GazeStatistics _statistics = Logging.GazeStatistics.Instance;
 
     protected virtual void HandleIntersection(Intersection intersection) { }
     protected virtual void HandleEvent(Event evt) { }

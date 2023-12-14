@@ -8,19 +8,42 @@ using System.Windows;
 
 namespace EMirrorsScores.Logging;
 
-internal class Statistics
+internal class GazeStatistics
 {
-    public static Statistics Instance => _instance ??= new();
+    public static GazeStatistics Instance => _instance ??= new();
+
+    public bool IsEnabled
+    { 
+        get => _isEnabled;
+        set
+        {
+            _isEnabled = value;
+            if (_isEnabled)
+            {
+                _startedAt = Timestamp.Ms;
+            }
+            else
+            {
+                foreach (var plane in _planes)
+                    plane.Value.Feed(Plane.Plane.Event.Exit);
+            }
+        }
+    }
 
     public void Feed(string name, Plane.Plane.Event evt)
     {
+        if (!IsEnabled)
+            return;
+
         if (!_planes.ContainsKey(name))
         {
             _planes.Add(name, new Entry());
         }
 
         var entry = _planes[name];
-        entry.Feed(evt);
+        entry.Feed(evt, _startedAt);
+
+        _startedAt = 0;
     }
 
     public bool SaveTo(string filename)
@@ -39,7 +62,7 @@ internal class Statistics
     {
         public long TotalTime => _totalTime;
 
-        public void Feed(Plane.Plane.Event evt)
+        public void Feed(Plane.Plane.Event evt, long loggingStartedAt = 0)
         {
             if (evt == Plane.Plane.Event.Enter)
             {
@@ -50,6 +73,10 @@ internal class Statistics
                 _totalTime += Timestamp.Ms - _startedAt;
                 _startedAt = 0;
             }
+            else if (loggingStartedAt > 0)
+            {
+                _totalTime += Timestamp.Ms - loggingStartedAt;
+            }
         }
 
         // Internal
@@ -58,9 +85,12 @@ internal class Statistics
         private long _startedAt = 0;
     }
 
-    static Statistics? _instance = null;
+    static GazeStatistics? _instance = null;
 
     readonly Dictionary<string, Entry> _planes = new();
+
+    bool _isEnabled = false;
+    long _startedAt = 0;
 
     private static bool Save(string filename, IEnumerable<object> records, string header = "")
     {

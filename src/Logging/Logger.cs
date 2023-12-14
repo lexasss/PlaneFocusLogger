@@ -25,7 +25,7 @@ public enum SavingResult
 /// Base class for logging classes
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public abstract class Logger<T> : IDisposable where T : class
+public abstract class Logger<T> where T : class
 {
     /// <summary>
     /// Saves the log with a specified file name.
@@ -56,13 +56,6 @@ public abstract class Logger<T> : IDisposable where T : class
         _records.Clear();
     }
 
-    public void Dispose()
-    {
-        _server.Dispose();
-        GC.SuppressFinalize(this);
-    }
-
-
     // Internal
 
     protected readonly List<T> _records = new ();
@@ -70,8 +63,6 @@ public abstract class Logger<T> : IDisposable where T : class
     protected abstract string Header { get; }
 
     protected string _folder;
-
-    protected readonly Server _server = new Server();
 
     protected Logger()
     {

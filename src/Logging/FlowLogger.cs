@@ -37,7 +37,7 @@ public class FlowLogger : Logger<FlowLogger.Record>
 
     public static FlowLogger Instance => _instance ??= new ();
 
-    public bool IsEnabled { get; set; } = true;
+    public bool IsEnabled { get; set; } = false;
 
     public bool HasRecords => _records.Count > 0;
     public string Folder => _folder;
@@ -55,9 +55,4 @@ public class FlowLogger : Logger<FlowLogger.Record>
     static FlowLogger? _instance = null;
 
     protected override string Header => Record.HEADER;
-
-    protected FlowLogger() : base()
-    {
-        _server.Message += (s, e) => Add(LogSource.Carla, e);
-    }
 }

@@ -97,7 +97,8 @@
     <Grid>
         <TabControl Padding="18">
             <TabItem Header="Control">
-                <Grid>
+                <Grid x:Name="grdControl"
+                      IsEnabled="False">
                     <Grid x:Name="grdDistractors" Grid.Row="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="3*"/>

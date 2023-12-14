@@ -25,6 +25,8 @@ public partial class Main : Page, IDisposable
             _tcpClient.Sample += TcpClient_Sample;
         }
 
+        _server.Message += CommandServer_Message;
+
         ScreenLogger.Initialize(txbOutput, wrpScreenLogger);
 
         _handler = new PlaneIntersectionHander(new Dictionary<Panel, Plane.Plane>()
@@ -39,7 +41,7 @@ public partial class Main : Page, IDisposable
 
         foreach (var button in grdQuestionnaire.Children.OfType<Button>())
         {
-            button.Click += QuestionnaireButton_Click;
+            button.Click += QuestionnaireAnswer_Click;
         }
 
         grdQuestionnaire.Visibility = Visibility.Collapsed;
@@ -58,17 +60,27 @@ public partial class Main : Page, IDisposable
     public void Dispose()
     {
         _tcpClient?.Dispose();
-        FlowLogger.Instance.Dispose();
+        _server.Dispose();
         GC.SuppressFinalize(this);
     }
 
     // Internal
 
+    static class CarlaCommands
+    {
+        public static string Start => "start";
+        public static string Stop => "stop";
+        public static string Pause => "pause";
+        public static string Continue => "continue";
+    }
+
     readonly SEClient.Tcp.Client? _tcpClient;
     readonly PlaneIntersectionHander _handler;
 
     readonly FlowLogger _logger = FlowLogger.Instance;
-    readonly Statistics _statistics = Statistics.Instance;
+    readonly GazeStatistics _statistics = GazeStatistics.Instance;
+
+    readonly Server _server = new Server();
 
     int _trafficConeCount = 0;
     int _answersCount = 1;
@@ -119,7 +131,45 @@ public partial class Main : Page, IDisposable
         catch (TaskCanceledException) { }
     }
 
-    private void QuestionnaireButton_Click(object sender, RoutedEventArgs e)
+    private void CommandServer_Message(object? sender, string e)
+    {
+        if (e == CarlaCommands.Start)
+        {
+            _logger.IsEnabled = true;
+            GazeStatistics.Instance.IsEnabled = true;
+            Dispatcher.Invoke(() => grdControl.IsEnabled = true);
+        }
+        else if (e == CarlaCommands.Stop)
+        {
+            _logger.Add(LogSource.Carla, e);
+            _logger.IsEnabled = false;
+            GazeStatistics.Instance.IsEnabled = false;
+            Dispatcher.Invoke(() => Quit_Click(this, new RoutedEventArgs()));
+        }
+        else if (e.StartsWith(CarlaCommands.Pause))
+        {
+            GazeStatistics.Instance.IsEnabled = false;
+            Dispatcher.Invoke(() => Questionnaire_Click(this, new RoutedEventArgs()));
+        }
+        else if (e.StartsWith(CarlaCommands.Continue))
+        {
+            GazeStatistics.Instance.IsEnabled = true;
+        }
+
+        _logger.Add(LogSource.Carla, e);
+    }
+
+    // UI
+
+    private void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (App.IsDebugging)
+        {
+            lblDebug.Visibility = Visibility.Visible;
+        }
+    }
+
+    private void QuestionnaireAnswer_Click(object sender, RoutedEventArgs e)
     {
         Button button = (Button)sender;
         var id = (string)button.Tag;
@@ -172,15 +222,6 @@ public partial class Main : Page, IDisposable
     {
         grdDistractors.Visibility = Visibility.Collapsed;
         grdQuestionnaire.Visibility = Visibility.Visible;
-    }
-    // UI
-
-    private void Page_Loaded(object sender, RoutedEventArgs e)
-    {
-        if (App.IsDebugging)
-        {
-            lblDebug.Visibility = Visibility.Visible;
-        }
     }
 
     private async void Quit_Click(object sender, RoutedEventArgs e)
