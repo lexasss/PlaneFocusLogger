@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PlaneFocusLogger.Properties {
+namespace EMirrorsScores.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

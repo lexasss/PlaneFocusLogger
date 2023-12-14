@@ -1,9 +1,9 @@
-﻿using PlaneFocusLogger.Plane;
+﻿using EMirrorsScores.Plane;
 using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
 
-namespace PlaneFocusLogger;
+namespace EMirrorsScores;
 
 class PlaneIntersectionHander
 {

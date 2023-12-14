@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PlaneFocusLogger.Plane;
+namespace EMirrorsScores.Plane;
 
 /// <summary>
 /// Maintaince a collection of planes/screens

@@ -1,4 +1,4 @@
-﻿using PlaneFocusLogger.Utils;
+﻿using EMirrorsScores.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
-namespace PlaneFocusLogger.Logging;
+namespace EMirrorsScores.Logging;
 
 [AttributeUsage(AttributeTargets.Class)]
 public class AllowScreenLogAttribute : Attribute

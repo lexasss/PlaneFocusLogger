@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Controls;
 
-namespace PlaneFocusLogger.Utils;
+namespace EMirrorsScores.Utils;
 
 /// <summary>
 /// Initilizes and sets changing action of some types of UI widgets

@@ -1,4 +1,4 @@
-﻿namespace PlaneFocusLogger.Logging;
+﻿namespace EMirrorsScores.Logging;
 
 /// <summary>
 /// Implements a logger use to log syncronized data from various routines 
@@ -56,5 +56,8 @@ public class FlowLogger : Logger<FlowLogger.Record>
 
     protected override string Header => Record.HEADER;
 
-    protected FlowLogger() : base() { }
+    protected FlowLogger() : base()
+    {
+        _server.Message += (s, e) => Add(LogSource.Carla, e);
+    }
 }

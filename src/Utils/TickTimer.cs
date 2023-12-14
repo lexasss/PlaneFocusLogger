@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Timers;
 
-namespace PlaneFocusLogger.Utils;
+namespace EMirrorsScores.Utils;
 
 internal interface ITickUpdatable
 {

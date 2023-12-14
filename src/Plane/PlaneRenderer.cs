@@ -1,9 +1,9 @@
-﻿using PlaneFocusLogger.Utils;
+﻿using EMirrorsScores.Utils;
 using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace PlaneFocusLogger.Plane;
+namespace EMirrorsScores.Plane;
 
 /// <summary>
 /// Visually represents SmartEye planes/screens

@@ -1,4 +1,4 @@
-﻿using PlaneFocusLogger.Utils;
+﻿using EMirrorsScores.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 
-namespace PlaneFocusLogger.Logging;
+namespace EMirrorsScores.Logging;
 
 internal class Statistics
 {
@@ -60,7 +60,7 @@ internal class Statistics
 
     static Statistics? _instance = null;
 
-    Dictionary<string, Entry> _planes = new();
+    readonly Dictionary<string, Entry> _planes = new();
 
     private static bool Save(string filename, IEnumerable<object> records, string header = "")
     {

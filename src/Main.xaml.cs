@@ -1,28 +1,16 @@
-﻿using PlaneFocusLogger.Logging;
+﻿using EMirrorsScores.Logging;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
-namespace PlaneFocusLogger;
+namespace EMirrorsScores;
 
-public partial class Main : Page, IDisposable, INotifyPropertyChanged
+public partial class Main : Page, IDisposable
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    public bool IsDriverBusyWithTask
-    {
-        get => _isDriverBusyWithTask;
-        set
-        {
-            _isDriverBusyWithTask = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDriverBusyWithTask)));
-        }
-    }
-
     public Main(SEClient.Tcp.Client? tcpClient)
     {
         InitializeComponent();
@@ -48,21 +36,29 @@ public partial class Main : Page, IDisposable, INotifyPropertyChanged
             { stpCentralConsole, new Plane.Plane("CentralConsole") },
             { stpRightMirror, new Plane.Plane("RightMirror") },
         });
+
+        foreach (var button in grdQuestionnaire.Children.OfType<Button>())
+        {
+            button.Click += QuestionnaireButton_Click;
+        }
+
+        grdQuestionnaire.Visibility = Visibility.Collapsed;
     }
 
-    public void Finalize()
+    public async Task Finalize()
     {
-        SaveLoggedData();
-
         if (_tcpClient?.IsConnected ?? false)
         {
-            _tcpClient.Stop();
+            await _tcpClient.Stop();
         }
+
+        SaveLoggedData();
     }
 
     public void Dispose()
     {
         _tcpClient?.Dispose();
+        FlowLogger.Instance.Dispose();
         GC.SuppressFinalize(this);
     }
 
@@ -74,7 +70,18 @@ public partial class Main : Page, IDisposable, INotifyPropertyChanged
     readonly FlowLogger _logger = FlowLogger.Instance;
     readonly Statistics _statistics = Statistics.Instance;
 
-    bool _isDriverBusyWithTask = false;
+    int _trafficConeCount = 0;
+    int _answersCount = 1;
+
+    QuestionnaireStage _questionnaireStage = QuestionnaireStage.NoAnswers;
+
+    enum QuestionnaireStage
+    {
+        NoAnswers,
+        OneAnswer,
+        TwoAnswers
+    }
+
 
     private void SaveLoggedData()
     {
@@ -82,9 +89,9 @@ public partial class Main : Page, IDisposable, INotifyPropertyChanged
         {
             _logger.IsEnabled = false;
             var timestamp = $"{DateTime.Now:u}";
-            if (_logger.SaveTo($"richa_{timestamp}.txt".ToPath()) == SavingResult.Save)
+            if (_logger.SaveTo($"emirrors_{timestamp}.txt".ToPath()) == SavingResult.Save)
             {
-                _statistics.SaveTo($"richa_{timestamp}_stat.txt".ToPath());
+                _statistics.SaveTo($"emirrors_{timestamp}_gaze.txt".ToPath());
             }
         }
     }
@@ -112,6 +119,60 @@ public partial class Main : Page, IDisposable, INotifyPropertyChanged
         catch (TaskCanceledException) { }
     }
 
+    private void QuestionnaireButton_Click(object sender, RoutedEventArgs e)
+    {
+        Button button = (Button)sender;
+        var id = (string)button.Tag;
+        var lane = id[0] == '0' ? "left" : "right";
+        var answer = id[1];
+
+        _logger.Add(LogSource.Lane, _answersCount.ToString(), lane, answer.ToString());
+
+        _questionnaireStage = _questionnaireStage switch
+        {
+            QuestionnaireStage.NoAnswers => QuestionnaireStage.OneAnswer,
+            QuestionnaireStage.OneAnswer => QuestionnaireStage.TwoAnswers,
+            _ => throw new Exception("Impossible")
+        };
+
+        if (_questionnaireStage == QuestionnaireStage.OneAnswer)
+        {
+            var IsEnabled = (string? tag) => tag?[0] != id[0];
+            foreach (var btn in grdQuestionnaire.Children.OfType<Button>())
+            {
+                if (!IsEnabled(btn.Tag.ToString()))
+                {
+                    btn.IsEnabled = false;
+                }
+            }
+        }
+        if (_questionnaireStage == QuestionnaireStage.TwoAnswers)
+        {
+            grdQuestionnaire.Visibility = Visibility.Collapsed;
+            grdDistractors.Visibility = Visibility.Visible;
+
+            _questionnaireStage = QuestionnaireStage.NoAnswers;
+            _answersCount += 1;
+
+            foreach (var btn in grdQuestionnaire.Children.OfType<Button>())
+            {
+                btn.IsEnabled = true;
+            }
+        }
+    }
+
+    private void TrafficCone_Click(object sender, RoutedEventArgs e)
+    {
+        _trafficConeCount += 1;
+        _logger.Add(LogSource.Distractor, _trafficConeCount.ToString());
+        lblTrafficConeCount.Content = _trafficConeCount.ToString();
+    }
+
+    private void Questionnaire_Click(object sender, RoutedEventArgs e)
+    {
+        grdDistractors.Visibility = Visibility.Collapsed;
+        grdQuestionnaire.Visibility = Visibility.Visible;
+    }
     // UI
 
     private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -122,10 +183,10 @@ public partial class Main : Page, IDisposable, INotifyPropertyChanged
         }
     }
 
-    private void Finish_Click(object sender, RoutedEventArgs e)
+    private async void Quit_Click(object sender, RoutedEventArgs e)
     {
         _handler.Reset();
-        Finalize();
+        await Finalize();
         Application.Current.Shutdown();
     }
 }

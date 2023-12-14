@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace PlaneFocusLogger;
+namespace EMirrorsScores;
 
 public partial class Connect : Page
 {
@@ -64,22 +64,19 @@ public partial class Connect : Page
 
     private async void Connect_Click(object? _, RoutedEventArgs e)
     {
-        if (App.IsDebugging)
+        if (!App.IsDebugging)
         {
-            Connected?.Invoke(this, null);
-            return;
-        }
+            if (txbHost.Text.Split('.').Where(p => byte.TryParse(p, out byte _)).Count() != 4)
+            {
+                MessageBox.Show("IP is not valid", Application.Current.MainWindow.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
-        if (txbHost.Text.Split('.').Where(p => byte.TryParse(p, out byte _)).Count() != 4)
-        {
-            MessageBox.Show("IP is not valid", Application.Current.MainWindow.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-            return;
-        }
-
-        if (!ushort.TryParse(txbPort.Text, out ushort value) || value < 1024)
-        {
-            MessageBox.Show("Port is not valid", Application.Current.MainWindow.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-            return;
+            if (!ushort.TryParse(txbPort.Text, out ushort value) || value < 1024)
+            {
+                MessageBox.Show("Port is not valid", Application.Current.MainWindow.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
         }
 
         btnConnect.IsEnabled = false;

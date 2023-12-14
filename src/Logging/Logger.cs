@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 
-namespace PlaneFocusLogger.Logging;
+namespace EMirrorsScores.Logging;
 
 [Flags]
 public enum LogSource
 {
     Tracker = 1,
     Driver = 2,
+    Distractor = 3,
+    Lane = 4,
+    Carla = 5,
 }
 
 public enum SavingResult
@@ -22,7 +25,7 @@ public enum SavingResult
 /// Base class for logging classes
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public abstract class Logger<T> where T : class
+public abstract class Logger<T> : IDisposable where T : class
 {
     /// <summary>
     /// Saves the log with a specified file name.
@@ -53,6 +56,12 @@ public abstract class Logger<T> where T : class
         _records.Clear();
     }
 
+    public void Dispose()
+    {
+        _server.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
 
     // Internal
 
@@ -62,6 +71,7 @@ public abstract class Logger<T> where T : class
 
     protected string _folder;
 
+    protected readonly Server _server = new Server();
 
     protected Logger()
     {

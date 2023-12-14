@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PlaneFocusLogger.Logging;
+namespace EMirrorsScores.Logging;
 
 internal static class String
 {
