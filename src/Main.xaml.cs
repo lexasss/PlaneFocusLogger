@@ -29,7 +29,7 @@ public partial class Main : Page, IDisposable
 
         ScreenLogger.Initialize(txbOutput, wrpScreenLogger);
 
-        _handler = new PlaneIntersectionHander(new Dictionary<Panel, Plane.Plane>()
+        var planes = new Dictionary<Panel, Plane.Plane> ()
         {
             { stpWindshield, new Plane.Plane("Windshield") },
             { stpLeftMirror, new Plane.Plane("LeftMirror") },
@@ -37,7 +37,10 @@ public partial class Main : Page, IDisposable
             { stpRearView, new Plane.Plane("RearView") },
             { stpCentralConsole, new Plane.Plane("CentralConsole") },
             { stpRightMirror, new Plane.Plane("RightMirror") },
-        });
+        };
+        _handler = new PlaneIntersectionHander(planes);
+
+        SEClient.Tcp.Client.SetEmulatedPlanes(planes.Select(kv => kv.Value.PlaneName).ToArray());
 
         foreach (var button in grdQuestionnaire.Children.OfType<Button>())
         {
@@ -80,7 +83,7 @@ public partial class Main : Page, IDisposable
     readonly FlowLogger _logger = FlowLogger.Instance;
     readonly GazeStatistics _statistics = GazeStatistics.Instance;
 
-    readonly Server _server = new Server();
+    readonly Server _server = new();
 
     int _trafficConeCount = 0;
     int _answersCount = 1;
@@ -187,10 +190,10 @@ public partial class Main : Page, IDisposable
 
         if (_questionnaireStage == QuestionnaireStage.OneAnswer)
         {
-            var IsEnabled = (string? tag) => tag?[0] != id[0];
+            bool IsAnotherLaneButton(string? tag) => tag?[0] != id[0];
             foreach (var btn in grdQuestionnaire.Children.OfType<Button>())
             {
-                if (!IsEnabled(btn.Tag.ToString()))
+                if (!IsAnotherLaneButton(btn.Tag.ToString()))
                 {
                     btn.IsEnabled = false;
                 }
