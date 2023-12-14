@@ -1,3 +1,3 @@
-# PlaneFocusLogger
+# E-Mirrors Scores
 
-Writes time spent on SmartEye World planes to a log file
+Control and loggin app for the e-mirrors study
